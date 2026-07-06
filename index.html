@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weekly Fuel Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Teko:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+--navy: #10151f;
+--navy-2: #171f2c;
+--amber: #f2a824;
+--amber-dim: #8a6314;
+--chalk: #eef0ec;
+--chalk-dim: #a9b0ac;
+--line: #2a3242;
+--girl: #e8823a;
+--boy: #3a8ee8;
+--paper: #f7f5ef;
+--ink: #171512;
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+margin: 0;
+background: var(--navy);
+color: var(--chalk);
+font-family: 'Inter', sans-serif;
+line-height: 1.5;
+}
+
+h1, h2, h3, .display {
+font-family: 'Teko', sans-serif;
+font-weight: 600;
+letter-spacing: 0.01em;
+text-transform: uppercase;
+color: var(--chalk);
+}
+
+.mono {
+font-family: 'Space Mono', monospace;
+}
+
+/* ---------- HERO / SCOREBOARD ---------- */
+header.board {
+padding: 4.5rem 1.5rem 3rem;
+text-align: center;
+background:
+radial-gradient(ellipse at 50% -10%, rgba(242,168,36,0.10), transparent 60%),
+var(--navy);
+border-bottom: 1px solid var(--line);
+}
+
+.eyebrow {
+font-family: 'Space Mono', monospace;
+font-size: 0.75rem;
+letter-spacing: 0.25em;
+color: var(--amber);
+text-transform: uppercase;
+margin-bottom: 0.75rem;
+}
+
+h1.title {
+font-size: clamp(3rem, 9vw, 6.5rem);
+line-height: 0.92;
+margin: 0 0 0.75rem;
+}
+
+header.board p.sub {
+max-width: 34rem;
+margin: 0 auto;
+color: var(--chalk-dim);
+font-size: 1.05rem;
+}
+
+.roster {
+display: flex;
+justify-content: center;
+gap: 1rem;
+margin-top: 2rem;
+flex-wrap: wrap;
+}
+
+.roster .card {
+display: flex;
+align-items: center;
+gap: 0.7rem;
+border: 1px solid var(--line);
+background: var(--navy-2);
+padding: 0.6rem 1.1rem;
+border-radius: 4px;
+}
+
+.jersey {
+font-family: 'Teko', sans-serif;
+font-size: 1.6rem;
+font-weight: 700;
+width: 2.2rem;
+height: 2.2rem;
+border-radius: 3px;
+display: flex;
+align-items: center;
+justify-content: center;
+color: var(--navy);
+}
+.jersey.g { background: var(--girl); }
+.jersey.b { background: var(--boy); }
+
+.roster .card .meta { text-align: left; font-size: 0.85rem; color: var(--chalk-dim); }
+.roster .card .meta strong { display: block; color: var(--chalk); font-size: 0.95rem; }
+
+/* ---------- NAV ---------- */
+nav.tabs {
+position: sticky;
+top: 0;
+z-index: 10;
+display: flex;
+gap: 0;
+overflow-x: auto;
+background: var(--navy);
+border-bottom: 1px solid var(--line);
+padding: 0 1rem;
+}
+nav.tabs button {
+flex: none;
+font-family: 'Space Mono', monospace;
+font-size: 0.8rem;
+letter-spacing: 0.05em;
+background: none;
+border: none;
+color: var(--chalk-dim);
+padding: 1rem 1rem 0.85rem;
+cursor: pointer;
+border-bottom: 2px solid transparent;
+white-space: nowrap;
+}
+nav.tabs button.active,
+nav.tabs button:hover {
+color: var(--amber);
+border-bottom-color: var(--amber);
+}
+
+main { max-width: 68rem; margin: 0 auto; padding: 2.5rem 1.5rem 5rem; }
+
+section.view { display: none; }
+section.view.active { display: block; }
+
+/* ---------- DAY GRID ---------- */
+.day-grid {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+gap: 1.1rem;
+}
+
+.day-card {
+background: var(--navy-2);
+border: 1px solid var(--line);
+border-radius: 6px;
+overflow: hidden;
+}
+
+.day-card .head {
+display: flex;
+align-items: baseline;
+justify-content: space-between;
+padding: 1rem 1.2rem 0.6rem;
+border-bottom: 1px dashed var(--line);
+}
+.day-card .head .num {
+font-family: 'Space Mono', monospace;
+color: var(--amber-dim);
+font-size: 0.75rem;
+}
+.day-card h3 {
+margin: 0;
+font-size: 1.7rem;
+}
+
+.day-card .meal {
+padding: 0.75rem 1.2rem;
+border-bottom: 1px solid var(--line);
+display: grid;
+grid-template-columns: 5.6rem 1fr;
+gap: 0.75rem;
+font-size: 0.92rem;
+}
+.day-card .meal:last-child { border-bottom: none; }
+.meal .label {
+font-family: 'Space Mono', monospace;
+font-size: 0.68rem;
+letter-spacing: 0.06em;
+text-transform: uppercase;
+color: var(--amber);
+align-self: start;
+padding-top: 0.15rem;
+}
+.meal .content { color: var(--chalk); }
+.meal .note { display: block; color: var(--chalk-dim); font-size: 0.82rem; margin-top: 0.15rem; }
+
+/* ---------- INFO / NOTES SECTION ---------- */
+.notes-grid {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+gap: 1.2rem;
+}
+.note-card {
+background: var(--navy-2);
+border: 1px solid var(--line);
+border-left: 3px solid var(--amber);
+border-radius: 4px;
+padding: 1.2rem 1.3rem;
+}
+.note-card h3 { font-size: 1.4rem; margin: 0 0 0.4rem; color: var(--amber); }
+.note-card p { margin: 0; color: var(--chalk-dim); font-size: 0.92rem; }
+
+/* ---------- SHOPPING LIST ---------- */
+.shop-grid {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+gap: 1.5rem;
+}
+.shop-col h3 {
+font-size: 1.5rem;
+color: var(--amber);
+border-bottom: 1px solid var(--line);
+padding-bottom: 0.4rem;
+margin-bottom: 0.6rem;
+}
+.shop-col ul { list-style: none; padding: 0; margin: 0; }
+.shop-col li {
+padding: 0.4rem 0;
+border-bottom: 1px dotted var(--line);
+display: flex;
+align-items: center;
+gap: 0.6rem;
+font-size: 0.93rem;
+}
+.shop-col li input[type=checkbox] {
+accent-color: var(--amber);
+width: 1rem;
+height: 1rem;
+}
+
+/* ---------- PRINT BUTTON ---------- */
+.print-bar {
+display: flex;
+justify-content: flex-end;
+margin-bottom: 1.2rem;
+}
+.print-bar button {
+font-family: 'Space Mono', monospace;
+font-size: 0.8rem;
+background: var(--amber);
+color: var(--navy);
+border: none;
+padding: 0.6rem 1.1rem;
+border-radius: 4px;
+cursor: pointer;
+letter-spacing: 0.03em;
+}
+.print-bar button:hover { background: #ffbf4d; }
+
+footer {
+text-align: center;
+padding: 2rem 1rem 3rem;
+color: var(--chalk-dim);
+font-size: 0.8rem;
+font-family: 'Space Mono', monospace;
+}
+
+/* ---------- PRINT STYLES ---------- */
+@media print {
+nav.tabs, .print-bar, header.board .roster { display: none !important; }
+body { background: var(--paper); color: var(--ink); }
+header.board { background: var(--paper); border: none; padding: 1rem 0 1.5rem; }
+h1.title, h2, h3, .eyebrow { color: var(--ink); }
+.eyebrow { color: #8a5a12; }
+section.view { display: block !important; page-break-before: always; }
+section.view:first-of-type { page-break-before: avoid; }
+.day-card, .note-card { background: #fff; border: 1px solid #ccc; }
+.meal .content, p, li { color: #333; }
+}
+
+@media (max-width: 640px) {
+.meal { grid-template-columns: 1fr; }
+.meal .label { padding-top: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="board">
+<div class="eyebrow">Weekly Fuel Plan</div>
+<h1 class="title">Game Week<br>Menu</h1>
+<p class="sub">Seven days of meals built for three active bodies — enough carbs to fuel practice, enough protein to recover from it, with extra calories and strength support for a 16-year-old who wants to gain weight and an 11-year-old boy in football, basketball, and baseball.</p>
+<div class="roster">
+<div class="card">
+<div class="jersey g">14</div>
+<div class="meta"><strong>Athlete — Girl</strong>Volleyball / track</div>
+</div>
+<div class="card">
+<div class="jersey b">16</div>
+<div class="meta"><strong>Athlete — Boy</strong>Multi-sport · wants to gain weight</div>
+</div>
+<div class="card">
+<div class="jersey b">11</div>
+<div class="meta"><strong>Athlete — Boy</strong>Multi-sport · lean weight and strength and agility</div>
+</div>
+</div>
+</header>
+
+<nav class="tabs">
+<button class="tab-btn active" data-target="week">Week Plan</button>
+<button class="tab-btn" data-target="notes">Athlete Notes</button>
+<button class="tab-btn" data-target="shopping">Shopping List</button>
+</nav>
+
+<main>
+
+<section id="week" class="view active">
+<div class="print-bar"><button onclick="window.print()">Print this page ↓</button></div>
+<div class="day-grid" id="day-grid"></div>
+</section>
+
+<section id="notes" class="view">
+<div class="notes-grid">
+<div class="note-card">
+<h3>Protein, every meal</h3>
+<p>Eggs, dairy, meat, or beans at breakfast, lunch, and dinner — growing, training bodies need more than a sedentary teen's plate.</p>
+</div>
+<div class="note-card">
+<h3>Weight-gain fuel</h3>
+<p>The 16-year-old aiming to gain weight should lean on calorie-dense meals, extra snacks, and consistent protein at each meal, while the 11-year-old playing football, basketball, and baseball needs hearty breakfasts and bigger carb portions before practices.</p>
+</div>
+<div class="note-card">
+<h3>Carbs are fuel, not filler</h3>
+<p>Rice, pasta, potatoes, oats, and bread are the primary energy source for practices and games. Don't cut portions before hard training days.</p>
+</div>
+<div class="note-card">
+<h3>Hydration</h3>
+<p>Water bottle refilled throughout the day, with extra during two-a-days or tournament weekends.</p>
+</div>
+<div class="note-card">
+<h3>Iron, for the 14-year-old</h3>
+<p>Athletic girls run a higher risk of iron deficiency, especially post-menarche. Lean on red meat, spinach, and beans a few times a week.</p>
+</div>
+<div class="note-card">
+<h3>Pre-practice snack</h3>
+<p>Something with quick carbs and a little protein, 60–90 minutes out: banana with peanut butter, or a granola bar with milk.</p>
+</div>
+<div class="note-card">
+<h3>Post-practice recovery</h3>
+<p>Chocolate milk or a protein smoothie within 30–45 minutes of finishing hits the carb-to-protein ratio that speeds recovery.</p>
+</div>
+</div>
+</section>
+
+<section id="shopping" class="view">
+<div class="print-bar"><button onclick="window.print()">Print this page ↓</button></div>
+<div class="shop-grid" id="shop-grid"></div>
+</section>
+
+</main>
+
+<footer>Built for a growing multi-sport household · increase portions and snacks for weight gain when needed</footer>
+
+<script>
+const days = [
+{
+name: "Monday", num: "DAY 01",
+meals: [
+["Breakfast", "Scrambled eggs, whole-grain toast, orange slices"],
+["Lunch", "Turkey & cheese wrap, baby carrots, apple"],
+["Pre-practice", "Banana + peanut butter"],
+["Dinner", "Grilled chicken, rice, roasted broccoli"],
+["Post-practice", "Chocolate milk"]
+]
+},
+{
+name: "Tuesday", num: "DAY 02",
+meals: [
+["Breakfast", "Greek yogurt, granola, berries"],
+["Lunch", "Leftover chicken & rice bowl"],
+["Pre-practice", "Granola bar + milk"],
+["Dinner", "Spaghetti with meat sauce, side salad"],
+["Post-practice", "Protein smoothie", "note: milk, banana, protein powder, spinach"]
+]
+},
+{
+name: "Wednesday", num: "DAY 03",
+meals: [
+["Breakfast", "Oatmeal with peanut butter and banana"],
+["Lunch", "Ham & cheese sandwich, veggie sticks, grapes"],
+["Pre-practice", "String cheese + crackers"],
+["Dinner", "Tacos (ground beef or chicken), beans, rice", "note: extra beans/spinach on taco night for iron"],
+["Post-practice", "Chocolate milk"]
+]
+},
+{
+name: "Thursday", num: "DAY 04",
+meals: [
+["Breakfast", "Eggs, toast, fruit"],
+["Lunch", "Leftover tacos or burrito bowl"],
+["Pre-practice", "Banana + peanut butter"],
+["Dinner", "Baked salmon or tilapia, sweet potato, green beans"],
+["Post-practice", "Protein smoothie"]
+]
+},
+{
+name: "Friday", num: "DAY 05",
+meals: [
+["Breakfast", "Greek yogurt, oats, fruit"],
+["Lunch", "Turkey wrap, apple, veggie sticks"],
+["Pre-practice", "Granola bar + milk"],
+["Dinner", "Chicken or beef stir-fry over rice"],
+["Post-practice", "Chocolate milk"]
+]
+},
+{
+name: "Saturday", num: "DAY 06",
+meals: [
+["Breakfast", "Pancakes or waffles with eggs on the side"],
+["Lunch", "Sandwich or leftovers, fruit"],
+["Pre-game", "Banana + peanut butter, 60–90 min before"],
+["Dinner", "Homemade burgers, corn on the cob"],
+["Post-game", "Chocolate milk or smoothie"]
+]
+},
+{
+name: "Sunday", num: "DAY 07",
+meals: [
+["Breakfast", "Eggs, toast, fruit"],
+["Lunch", "Leftovers or build-your-own sandwich"],
+["Snack", "Yogurt + granola"],
+["Dinner", "Sheet-pan sausage/chicken, roasted potatoes, peppers", "note: prep extra for Monday lunch"],
+["Evening", "Light snack if needed — fruit or crackers"]
+]
+}
+];
+
+const grid = document.getElementById("day-grid");
+days.forEach(day => {
+const card = document.createElement("div");
+card.className = "day-card";
+let mealsHtml = day.meals.map(m => `
+<div class="meal">
+<div class="label">${m[0]}</div>
+<div class="content">${m[1]}${m[2] ? `<span class="note">${m[2]}</span>` : ""}</div>
+</div>
+`).join("");
+card.innerHTML = `
+<div class="head">
+<h3>${day.name}</h3>
+<span class="num mono">${day.num}</span>
+</div>
+${mealsHtml}
+`;
+grid.appendChild(card);
+});
+
+const shopLists = {
+"Proteins": ["Eggs (2 dozen)", "Greek yogurt", "Chicken breast", "Ground beef", "Salmon or tilapia filets", "Turkey & ham lunch meat", "Italian sausage", "Beans (black or pinto)", "String cheese", "Milk", "Protein powder", "Peanut butter"],
+"Carbs": ["Whole-grain bread", "Oats", "Rice", "Spaghetti noodles", "Tortillas", "Granola", "Sweet potatoes", "Potatoes (for sheet-pan + burgers)", "Hamburger buns", "Corn on the cob"],
+"Produce": ["Bananas", "Apples", "Grapes", "Berries", "Baby carrots", "Broccoli", "Green beans", "Spinach", "Bell peppers", "Salad greens", "Corn"],
+"Pantry / Other": ["Marinara sauce", "Taco seasoning", "Stir-fry sauce", "Granola bars", "Chocolate milk (or syrup)", "Olive oil", "Condiments for burgers/tacos"]
+};
+
+const shopGrid = document.getElementById("shop-grid");
+Object.entries(shopLists).forEach(([cat, items]) => {
+const col = document.createElement("div");
+col.className = "shop-col";
+col.innerHTML = `<h3>${cat}</h3><ul>${items.map(i => `<li><input type="checkbox"> ${i}</li>`).join("")}</ul>`;
+shopGrid.appendChild(col);
+});
+
+document.querySelectorAll(".tab-btn").forEach(btn => {
+btn.addEventListener("click", () => {
+document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+btn.classList.add("active");
+document.getElementById(btn.dataset.target).classList.add("active");
+});
+});
+</script>
+
+</body>
+</html>
